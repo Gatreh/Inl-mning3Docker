@@ -41,10 +41,24 @@ Med det ur vägen så ändrar jag lite på tidigare [provisionerings script](#pr
 
 ## Uppgift 2
 ### Uppdatering av appen
-Det första som måste hända nu när det fungerar på via VM'en är att få igång någon form av interaktion mellan appen och databasen. Ser ingen igentlig anledning till att vi inte skulle göra något väldigt likt vad vi gjort tidigare så jag tar hjälp av tidigare uppgifter för att hämta data från sidan och skicka direkt in det till en mongodb container
+Det första som måste hända nu när det fungerar på via VM'en är att få igång någon form av interaktion mellan appen och databasen. Ser ingen igentlig anledning till att vi inte skulle göra något väldigt likt vad vi gjort tidigare så jag tar hjälp av tidigare uppgifter för att hämta data från sidan och skicka direkt in det till en mongodb container.
+![Development finished](./db-ready.png)
 ### Implementation av Compose
-### Provisionering 
+Jag la in en databas som jag kallar mongodb-data, en mongocontainer som jag kallar db och jag startar appen med min image och lite environment variables i [compose.yaml](#composeyaml).  
+
+Detta kombinerade jag sen med en write_files i min cloud-init .yaml fil. för att få över den till den virtuella maskinen... då jag är för lat för att lägga upp en CICD pipeline 1 timme 20 min innan inlämningen ska hända Xd
 ## Sammanfattning
+Rätt kul uppgifter ändå, ganska standard för vad vi har gjort visseligen i kursen, lekte lite med min norska kompis när den faktiskt va uppe på den virtuella maskinen som du seri bilden nedan. Loggade in på servern för att se till att compose filen faktiskt följde med och testa starta och stänga ner saker med docker compose fungerar. Och att se till så datan klarar sig förstås.  
+![On Virtual Machine](./on-vm.png)
+
+Tror ändå mitt favoritkommando denna gången var:
+```bash
+ssh azureuser@$(az vm show -d -g docker3 -n docker3 --query publicIps -o tsv)
+```
+Men lärde mig även hur man tar bort resursgrupper via CLI och mycketmer om .yaml.  
+
+En liten märklig sak är att trots att nätverket aldrig säger att det startas så fungerar det ändå på servern:
+![Inget Nätverk](./no-network.png)
 ## Kod
 #### provision_vm.sh
 ```bash
@@ -87,4 +101,31 @@ runcmd:
 - apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
 - docker run -d -p 80:8080 --name app gatreh/uppgift3
 ```
+#### compose.yaml
+```yaml
+services:
+  # MongoDB Service
+  db:
+    image: mongo
+    restart: always
+    volumes:
+      - mongodb-data:/data/db
+  # App Service
+  app:
+    image: gatreh/uppgift3
+    restart: always
+    ports:
+      - 80:8080
+    environment:
+      - MongoDbSettings__ConnectionString=mongodb://db:27017
+      - TODO_SERVICE_IMPLEMENTATION=MongoDb
+      - ASPNETCORE_ENVIRONMENT=Development
+# Volumes
+volumes:
+  mongodb-data:
+```
 ## Referenser
+- [Microsoft Linux VM](https://learn.microsoft.com/en-us/azure/virtual-machines/linux/tutorial-automate-vm-deployment)  
+Väldigt användbart för att veta hur man ska formatera cloud-init filerna så dem faktiskt skapar saker.
+- [Skolans Todo app](https://github.com/Campus-Molndal/ToDoApp)  
+Tillät mig inspireras ganska starkt av den men jag gjorde vad jag kunde för att göra den på ett så eget sätt som möjligt.
