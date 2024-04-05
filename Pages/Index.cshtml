@@ -1,10 +1,38 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "My page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Welcome to the Scuff Zone</h1>
+    <p>Here you can do exiting things like see and create tags.</p>
+
+    <form method="post">
+        <input type="text" name="name" id="name" />
+        <button type="submit" class="btn btn-primary">Add</button>
+    </form>
+    <div class="row justify-content-center">
+        <table class="table">
+            <tbody>
+                @if (Model.DbItems != null)
+                {
+                    @foreach (var item in Model.DbItems)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>
+                                <form method="post" asp-page-handler="Delete">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    <br />
+    <p>Oh I guess you can delete them by clicking the <button class="btn btn-danger">Delete</button> button too.</p>
 </div>

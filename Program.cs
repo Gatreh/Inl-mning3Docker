@@ -1,7 +1,11 @@
+using Inlämning3Docker.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+builder.Services.AddSingleton<IDbService, MongoDbToDoService>();
 
 var app = builder.Build();
 
